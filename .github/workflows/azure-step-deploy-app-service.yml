@@ -3,6 +3,10 @@ name: "Azure - Step: Deploy App Service"
 on:
   workflow_call:
     inputs:
+      environment:
+        description: "GitHub environment name (es. test, production). Abilita le regole di protezione e i reviewer obbligatori."
+        type: string
+        required: true
       app-name:
         description: "Nome dell'Azure App Service (es. kusarigate-test)"
         type: string
@@ -29,6 +33,7 @@ jobs:
   deploy:
     name: Deploy to ${{ inputs.app-name }}
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     permissions:
       id-token: write
       contents: read
