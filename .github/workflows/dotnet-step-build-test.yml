@@ -23,6 +23,8 @@ jobs:
   build-test:
     name: Build and Test
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout
         # TODO: pin to commit hash — e.g. actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
