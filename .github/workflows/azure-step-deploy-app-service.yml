@@ -1,0 +1,58 @@
+name: "Azure - Step: Deploy App Service"
+
+on:
+  workflow_call:
+    inputs:
+      app-name:
+        description: "Nome dell'Azure App Service (es. kusarigate-test)"
+        type: string
+        required: true
+      dotnet-version:
+        description: ".NET SDK version"
+        type: string
+        required: false
+        default: "10.0.x"
+      project-path:
+        description: "Path al file .csproj da pubblicare"
+        type: string
+        required: false
+        default: "."
+    secrets:
+      azure-client-id:
+        required: true
+      azure-tenant-id:
+        required: true
+      azure-subscription-id:
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.app-name }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET ${{ inputs.dotnet-version }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+
+      - name: Publish
+        run: dotnet publish ${{ inputs.project-path }} --configuration Release --output ./publish
+
+      - name: Login to Azure (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.azure-client-id }}
+          tenant-id: ${{ secrets.azure-tenant-id }}
+          subscription-id: ${{ secrets.azure-subscription-id }}
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ inputs.app-name }}
+          package: ./publish
