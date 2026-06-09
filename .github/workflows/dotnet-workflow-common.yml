@@ -1,0 +1,26 @@
+name: ".NET - Common Workflow"
+
+# Chains all code-quality steps for .NET projects:
+# build → test (sonar-step-analyze can be added here when configured)
+
+on:
+  workflow_call:
+    inputs:
+      dotnet-version:
+        description: ".NET SDK version to use"
+        type: string
+        required: false
+        default: "10.0.x"
+      working-directory:
+        description: "Root directory of the .NET solution"
+        type: string
+        required: false
+        default: "."
+
+jobs:
+  build-test:
+    name: Build and Test
+    uses: ./.github/workflows/dotnet-step-build-test.yml
+    with:
+      dotnet-version: ${{ inputs.dotnet-version }}
+      working-directory: ${{ inputs.working-directory }}

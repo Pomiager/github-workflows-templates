@@ -1,0 +1,46 @@
+name: "Docker - Step: Deploy"
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Target GitHub environment (test/staging/production)"
+        type: string
+        required: true
+      image-tag:
+        description: "Full image reference to deploy (e.g.: ghcr.io/Pomiager/my-app:v1.2.3)"
+        type: string
+        required: true
+      service-name:
+        description: "Service or container name to update"
+        type: string
+        required: true
+    secrets:
+      deploy-ssh-host:
+        required: false
+      deploy-ssh-user:
+        required: false
+      deploy-ssh-key:
+        required: false
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Deploy ${{ inputs.service-name }}
+        run: |
+          echo "Deploying ${{ inputs.image-tag }} to ${{ inputs.environment }}"
+          # TODO: implement deploy logic for your infrastructure
+          # Option A — SSH + docker compose pull & up:
+          # ssh -o StrictHostKeyChecking=no ${{ secrets.deploy-ssh-user }}@${{ secrets.deploy-ssh-host }} \
+          #   "docker pull ${{ inputs.image-tag }} && docker compose -p ${{ inputs.service-name }} up -d"
+          #
+          # Option B — Azure Web App:
+          # az webapp config container set --name ${{ inputs.service-name }} \
+          #   --resource-group <rg> --container-image-name ${{ inputs.image-tag }}
+          #
+          # Option C — Kubernetes:
+          # kubectl set image deployment/${{ inputs.service-name }} \
+          #   app=${{ inputs.image-tag }}

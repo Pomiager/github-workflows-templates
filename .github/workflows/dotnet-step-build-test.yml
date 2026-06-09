@@ -1,0 +1,47 @@
+name: ".NET - Step: Build and Test"
+
+on:
+  workflow_call:
+    inputs:
+      dotnet-version:
+        description: ".NET SDK version to use"
+        type: string
+        required: false
+        default: "10.0.x"
+      working-directory:
+        description: "Root directory of the .NET solution"
+        type: string
+        required: false
+        default: "."
+      build-configuration:
+        description: "Build configuration (Release/Debug)"
+        type: string
+        required: false
+        default: "Release"
+
+jobs:
+  build-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        # TODO: pin to commit hash — e.g. actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@v4
+
+      - name: Setup .NET ${{ inputs.dotnet-version }}
+        # TODO: pin to commit hash
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+        working-directory: ${{ inputs.working-directory }}
+
+      - name: Build
+        run: dotnet build --no-restore --configuration ${{ inputs.build-configuration }}
+        working-directory: ${{ inputs.working-directory }}
+
+      - name: Test
+        run: dotnet test --no-build --configuration ${{ inputs.build-configuration }} --verbosity normal
+        working-directory: ${{ inputs.working-directory }}
